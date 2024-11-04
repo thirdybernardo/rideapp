@@ -168,13 +168,13 @@ const external = StyleSheet.create({
     marginTop: windowHeight(25),
   },
   mt_30: {
-    marginTop: windowHeight(35),
+    marginTop: windowHeight(30),
   },
   mt_50: {
-    marginTop: windowHeight(45),
+    marginTop: windowHeight(50),
   },
   mt_40: {
-    marginTop: windowHeight(55),
+    marginTop: windowHeight(40),
   },
   mt_55: {
     marginTop: '40%',

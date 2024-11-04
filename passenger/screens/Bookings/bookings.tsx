@@ -37,8 +37,8 @@ const Bookings= () => {
       <MapView
         style={styles.map}
         initialRegion={{
-          latitude: location.latitude,
-          longitude: location.longitude,
+          latitude: 14.5695,
+          longitude:  121.0549,
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
         }}

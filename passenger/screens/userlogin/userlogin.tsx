@@ -1,21 +1,17 @@
 import { View, Text , Image, TextInput, Alert} from 'react-native'
 import React, {useState } from 'react'
 import { useToast } from "react-native-toast-notifications";
-import styles from "./styles";
-import Images from "@/utils/images";
 import { router } from "expo-router";
 import SignInText from "@/components/login/signin.text";
 import PhoneNumberInput from "@/components/login/phone-number.input";
 import Button from "@/components/common/button";
 import AuthContainer from "@/utils/container/auth-container";
- 
-import axios from "axios";
-import PasswordInput from '@/components/login/password-input';
 import { commonStyles } from "@/styles/common.style";
 import { windowHeight, windowWidth } from "@/themes/app.constant";
 import { external } from "@/styles/external.style";
 import styles2 from "@/screens/userlogin/styles";
 import color from "@/themes/app.colors";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function UserLoginScreen() {
     const [phone_number, setphone_number] = useState("");
@@ -24,37 +20,21 @@ export default function UserLoginScreen() {
     const [countryCode, setCountryCode] = useState("+63");
     const toast = useToast();
     const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
+    const [password, setPassword] = useState('Pass1234');
+    const [processid, setProcessId] = useState();
+    const [elementVisible, setElementVisible] = useState(false);
+    const [elementVisibleOTP, setElementvisibleOTP] = useState(false);
+    const [elementPhone, setElementPhone] = useState(true);
+    const [enterOtp, updatetOtp] = useState('');
+    const [token, setToken] = useState("");
+   
     const handleSubmit = async () => {
       try {
-        const apiUrl = 'https://testapi.xpress.ph/v1/'; // Ensure it's a valid URL
+       
+        const apiUrl = 'https://testapi.xpress.ph/v1/'; 
     
         const data = `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&roleId=3`;
-    /* 
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          body: data,
-          headers: {
-             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-          },
-        
-        });
-
-
-    
-        const result = await response.json();
-        if (result) {
-          Alert.alert('Success', 'You are logged in!', result.ProcessId);
-         
-        } else {
-          Alert.alert('Error', result.message || 'Login failed');
-        }
-        const processId = result
-        console.log('processId222', processId)
-      } catch (error) {
-        console.error('Network Request Failed:', error);
-        Alert.alert('Error', 'Network request failed. Please check your connection and server.');
-      } */
+   
        
         fetch('https://testapi.xpress.ph/v1/Login', {
           method: 'POST',
@@ -63,21 +43,103 @@ export default function UserLoginScreen() {
             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
           }
         })
+        
         .then(response => response.json())
         .then(data => {
-          if (data.error){
-            Alert.alert('Error', data.message || 'Login failed');
-           
+          console.log("test1", data.ProcessId)
+          if (data.ProcessId){
+            const processId = data.ProcessId;
+            setProcessId(processId)
+            setElementvisibleOTP(true)
+            setElementPhone(false)
+            
           }else{
-            Alert.alert('Success', 'You are logged in!', data.ProcessId);
+            Alert.alert('Error', data.message || 'Login failed'); 
           }
-          const processId = data.ProcessId;
-          console.log(processId)
-        });
-      }catch (error) {
-          console.error('Network Request Failed:', error);
-          Alert.alert('Error', 'Network request failed. Please check your connection and server.');
-        }
+          
+            if (processid) {
+              try {
+                const dto = {
+                  ProcessId: processid,
+                  Password: '112233' // Password 112233 is set for web admin
+                  };
+            
+                fetch('https://testapi.xpress.ph/v1/api/Otp/CheckOTP', {
+                  method: 'POST',
+                  body: JSON.stringify(dto),
+                  headers: {
+                      'Content-Type': 'application/json'
+                  }
+                })
+                
+              .then(response => response.json())
+               .then(checkOtpResponse => {
+                console.log("test2",  checkOtpResponse)
+    
+                if (checkOtpResponse.error){
+                    Alert.alert('Error', 'Network request failed. Please check your connection and server.');
+                    return;
+                }
+    
+                //token
+                try {
+                  fetch('https://testapi.xpress.ph/v1/token', {
+                    method: 'POST',
+                    body: 'processId=' + processid + '&roleId=2',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                    }
+                  })
+                  
+                .then(response => response.json())
+                .then(data => {
+                  if (data.error) {
+                    Alert.alert('Error', 'Network request failed. Please check your connection and server.');
+                    return;
+                }
+
+                setToken(data.access_token)
+                const authData = {
+                  access_token: data.access_token,
+                  '.expires': data['.expires']
+                };
+                
+                const authDataJson = JSON.stringify(authData);
+            
+                // Store the token in AsyncStorage
+                AsyncStorage.setItem('authData', authDataJson);
+            
+                console.log("Token:", data.access_token);  // Log token to verify
+                console.log("data record:", data); 
+                
+                if (token!==null) {
+                  Alert.alert('success token', authDataJson);
+              
+                }
+                 
+                 router.push("/(tabs)/home");
+               
+                });
+                
+                }catch (error) {
+                    console.error('Network Request Failed:', error);
+                    Alert.alert('Error', 'Network request failed. Please check your connection and server.');
+                }
+    
+                 
+              });
+              }catch (error) {
+                  console.error('Network Request Failed:', error);
+                  Alert.alert('Error', 'Network request failed. Please check your connection and server.');
+              } 
+
+            }
+           
+          });
+            }catch (error) {
+                console.error('Network Request Failed:', error);
+                Alert.alert('Error', 'Network request failed. Please check your connection and server.');
+            }
     };
       
 
@@ -89,15 +151,14 @@ export default function UserLoginScreen() {
             <View>
               <View>
                 <View>
-               {/*    <Image style={styles.transformLine} source={Images.line} /> */}
                   <SignInText />
                   <View style={[external.mt_2, external.Pb_10]}>
-                    
-                  <View>
+                    { elementPhone ? (
+                    <View>
                       <Text
                         style={[commonStyles.mediumTextBlack, { marginTop: windowHeight(8) }]}
                       >
-                        Username
+                        Mobile
                       </Text>
                       <View
                         style={[
@@ -118,7 +179,7 @@ export default function UserLoginScreen() {
                           ]}
                         >
                           <TextInput
-                            placeholder="Username"
+                            placeholder="Enter Mobile"
                             style={[commonStyles.regularText]}
                             placeholderTextColor={color.subtitle}
                             value={username}
@@ -128,13 +189,17 @@ export default function UserLoginScreen() {
                         </View>
                       </View>
                     </View>
+                    ):""}
 
+                    {
+                      elementVisible ? (
                     <View>
-                      <Text
+                     <Text
                         style={[commonStyles.mediumTextBlack, { marginTop: windowHeight(8) }]}
                       >
-                        Password
+                        Enter Otp
                       </Text>
+                     
                       <View
                         style={[
                           external.fd_row,
@@ -153,7 +218,7 @@ export default function UserLoginScreen() {
                             },
                           ]}
                         >
-                          <TextInput
+                      <TextInput
                             placeholder="Password"
                             style={[commonStyles.regularText]}
                             placeholderTextColor={color.subtitle}
@@ -163,7 +228,52 @@ export default function UserLoginScreen() {
                           />
                         </View>
                       </View>
+                       
                     </View>
+                     ) : ""
+                    }
+                    {
+                      elementVisibleOTP ? (
+                    <View>
+                    
+                     <Text
+                        style={[commonStyles.mediumTextBlack, { marginTop: windowHeight(8) }]}
+                      >
+                        Enter Otp
+                      </Text>
+                     
+                      <View
+                        style={[
+                          external.fd_row,
+                          external.ai_center,
+                          external.mt_5,
+                          { flexDirection: "row" },
+                        ]}
+                      >
+                  
+                        <View
+                          style={[
+                            styles2.phoneNumberInput,
+                            {
+                              width: windowWidth(400),
+                              borderColor: color.border,
+                            },
+                          ]}
+                        >
+                      <TextInput
+                            placeholder="Enter OTP"
+                            style={[commonStyles.regularText]}
+                            placeholderTextColor={color.subtitle}
+                            value={enterOtp}
+                            onChangeText={updatetOtp}
+                            maxLength={30}
+                          />
+                        </View>
+                      </View>
+                       
+                    </View>
+                     ) : ""
+                    }
                     
                     <View style={[external.mt_25, external.Pb_15]}>
                     <Button title="Login" onPress={handleSubmit} />

@@ -1,45 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated, Image, ScrollView  } from 'react-native';
 import Images from "../../../utils/images"
-import { useToast } from "react-native-toast-notifications";
-import { router } from "expo-router";
-import AuthContainer from "@/utils/container/auth-container";
-import { windowHeight } from "@/themes/app.constant";
-import { external } from "@/styles/external.style";
-import axios from "axios"; 
-
+ 
 
 const Profile = () => {
-  // State to manage visibility
   const [isProfileVisible, setIsProfileVisible] = useState(false);
 
-  // State for animating the profile section
-  const slideAnim = useState(new Animated.Value(-200))[0]; // Initial value for hidden position
-
-  // Toggle visibility
-  const toggleProfile = () => {
-    if (isProfileVisible) {
-      // Hide Profile: Animate the slide out
-      Animated.timing(slideAnim, {
-        toValue: -200, // Move it out of the screen
-        duration: 300,
-        useNativeDriver: true,
-      }).start(() => setIsProfileVisible(false));
-    } else {
-      // Show Profile: Animate the slide in
-      setIsProfileVisible(true);
-      Animated.timing(slideAnim, {
-        toValue: 0, // Move it into the screen
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-    }
-  };
+  const slideAnim = useState(new Animated.Value(-200))[0];
+ 
 
   return (
     <View style={styles.container}>
-      {/* Tab Icon */}
-     {/*  <TouchableOpacity onPress={toggleProfile} style={styles.tabIcon}> */}
+ 
      <View  style={styles.tabIcon}>
         <Text style={styles.tabIconText}>Profile</Text>
          <View style={styles.profileHeader}>
@@ -51,33 +23,30 @@ const Profile = () => {
               source={Images.vios}
               style={styles.carImage}
             />
-            <Text style={styles.profileName}>Jane Dela Cruz</Text>
-            <Text style={styles.profileName}>Age : 46</Text>
+            <Text style={styles.profileName}>userName: MOTO 1</Text>
+            <Text style={styles.profileName}>Rider ID: 500</Text>
             <Text style={styles.profileName}>(20)Ratings ⭐⭐⭐⭐⭐</Text>
+            <Text style={styles.profileName}>Email: qa@xpress.com.ph</Text>
           </View>
           <View style={styles.headerBorder} />
           
-           <View style={styles.twoColumnRow}>
-              <Text style={styles.leftColumnText}>Toyota Vios</Text>
-              <Text style={styles.rightColumnText}>: #123456</Text>
-            </View>
+          
             <View style={[styles.barGraph, styles.greenDeep]}>
                 <View style={{ flex: 6 }}>
                    <Text style={styles.textLeft}>Driver ID</Text>
                    <Text style={styles.textLeft}>Status</Text>
                 </View>
                 <View style={{ flex: 6}}>
-                    <Text style={styles.textRight}>#123456</Text>
+                    <Text style={styles.textRight}>#500</Text>
                     <Text style={styles.textRight}>Active</Text>
                 </View>
             </View>
-              {/* Card Container for Transaction History */}
-           {/* Card Container for Transaction History with ScrollView */}
+           
            <View style={styles.cardContainer}>
             <Text style={styles.cardTitle}>Transaction History</Text>
             <Text style={styles.cardTrips}>Trips Completed</Text>
-            <ScrollView style={styles.scrollableContent}>
-              {/* Example Transactions */}
+           {/*  <ScrollView style={styles.scrollableContent}>
+              
               <View style={styles.transactionRow}>
                 <Text style={styles.transactionTextLeft}>Makati #1234</Text>
                 <Text style={styles.transactionText}>P25.00</Text>
@@ -90,7 +59,7 @@ const Profile = () => {
                 <Text style={styles.transactionTextLeft}>Cavite City #9101</Text>
                 <Text style={styles.transactionText}>P218.00</Text>
               </View>
-              {/* Add more dynamic transactions here */}
+             
               <View style={styles.transactionRow}>
                 <Text style={styles.transactionTextLeft}>Quezon City #1111</Text>
                 <Text style={styles.transactionText}>P135.00</Text>
@@ -119,8 +88,8 @@ const Profile = () => {
                 <Text style={styles.transactionTextLeft}>Order #2222</Text>
                 <Text style={styles.transactionText}>P150.00</Text>
               </View>
-              {/* Example continues */}
-            </ScrollView>
+             
+            </ScrollView> */}
           </View>
          <View>
         </View>
@@ -130,17 +99,14 @@ const Profile = () => {
       {/* Profile Section */}
       {isProfileVisible && (
         <Animated.View style={[styles.profileSection, { transform: [{ translateX: slideAnim }] }]}>
-          {/* Profile Image and Name */}
           <View style={styles.profileHeader}>
             <Image
-              source={Images.user} // Replace with actual image URL
+              source={Images.user} 
               style={styles.profileImage}
             />
             
             <Text style={styles.profileName}>Jane Dela Cruz</Text>
           </View>
-
-          {/* Example Profile Content */}
           <Text style={styles.profileText}>Profile Information</Text>
         </Animated.View>
       )}

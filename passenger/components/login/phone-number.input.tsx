@@ -39,8 +39,6 @@ export default function PhoneNumberInput({ width }: any) {
           />
         
         </View>
-
-        
       </View>
     </View>
   );
